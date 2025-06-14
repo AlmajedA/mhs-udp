@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  forwarder:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.forwarder
+    networks:
+      app_net:
+        ipv4_address: 172.20.0.10
+
+  sender:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.sender
+    environment:
+      - DISPLAY=${DISPLAY}
+      - FORWARDER_HOST=forwarder
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    depends_on:
+      - forwarder
+    networks:
+      app_net:
+        ipv4_address: 172.20.0.20
+
+  receiver1:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.receiver
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    depends_on:
+      - forwarder
+    networks:
+      app_net:
+        ipv4_address: 172.20.0.30
+
+  receiver2:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.receiver
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    depends_on:
+      - forwarder
+    networks:
+      app_net:
+        ipv4_address: 172.20.0.31
+
+networks:
+  app_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+          gateway: 172.20.0.1

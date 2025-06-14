@@ -1,0 +1,21 @@
+# Use Python base image
+FROM python:3.9
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    python3-tk \
+    xauth \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy sender files
+COPY sender_gui.py sender.py ./
+
+# Set environment variables
+ENV DISPLAY=host.docker.internal:0.0
+ENV FORWARDER_HOST=forwarder
+
+# Run the sender
+CMD ["python", "sender_gui.py"]
