@@ -1,29 +1,26 @@
 import socket
+import struct
 
 class Forwarder:
     def __init__(self):
         self.forwarder_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.ip = '0.0.0.0'
-        self.forwarder_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.ip = '10.65.121.135'
+
+        ttl = struct.pack('b', 1) # 1 for local network
+        self.forwarder_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
         self.port = 9000
         self.address = (self.ip, self.port)
         self.forwarder_socket.bind(self.address)
-        self.receivers_address = []
-        self.broadcast_message = 'pfg_ip_broadcast_rec'
+
+        # Set up group
+        self.group_address = ('224.1.1.1', 9001)
 
     def forward(self):
         print(f"Forwarder running with ip address: {self.ip}, and port: {self.port}")
         while True:
             payload, sender_address = self.forwarder_socket.recvfrom(1024)
-            message = payload.decode()
-
-            if message == self.broadcast_message:
-                print(f"Registered receiver at: {sender_address}")
-                self.receivers_address.append(sender_address) 
-                continue
             
-            for rec_addr in self.receivers_address:
-                self.forwarder_socket.sendto(payload, rec_addr)
+            self.forwarder_socket.sendto(payload, self.group_address)
                 
 if __name__ == "__main__":
     forwarder = Forwarder()

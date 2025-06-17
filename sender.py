@@ -5,16 +5,16 @@ class Sender:
     def __init__(self):
         self.sender_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         
-        # Get forwarder address from environment variable
-        forwarder_host = os.environ.get('FORWARDER_HOST', '0.0.0.0')
-        self.forwarder_address = (forwarder_host, 9000)
+        self.forwarder_address = ('10.65.121.135', 9000)
     
     def send(self, message):
         try:
+            print(message)
             payload = message.encode()
             self.sender_socket.sendto(payload, self.forwarder_address)
             return True
         except Exception as e:
+            print(e)
             return f"Error: {str(e)}"
     
     def close(self):
